@@ -3,7 +3,7 @@ const HTTP_PORT = config.get("http.port");
 
 const logger = require("./logger");
 const Document = require("./document");
-const DocumentFile = require("./documentFile");
+const Compiler = require("./compiler");
 
 const express = require("express");
 const multer = require("multer");
@@ -27,8 +27,19 @@ app.post("/upload", upload.array("documents"), async (req, res) => {
 
     await document.addFiles(req.files, req.body.main);
 
-    res.sendStatus(200);
+    res.json(document);
+});
 
+app.get("/document/:id/compile", async (req, res) => {
+    if (!req.params.id) return res.status(400).send("no document specified");
+
+    let document = await Document.findByPk(req.params.id);
+    if(!document) res.sendStatus(400);
+
+    let compiler = new Compiler(document);
+    await compiler.compile();
+
+    res.json(document);
 });
 
 module.exports.start = () => {

@@ -17,7 +17,7 @@ class Document extends Sequelize.Model {
         return new Promise((resolve, reject) => {
             let foundMainFile = false;
             fs.mkdir(this.folder, (err) => {
-                if (err) throw err;
+                if (err) return reject(err.message);
 
                 async.each(files, (file, cb) => {
                     const dest = this.folder + path.sep + file.originalname;
@@ -50,6 +50,27 @@ class Document extends Sequelize.Model {
                 });
             });
         });
+    }
+
+    /**
+     * Add new file to doc
+     * @param {string} filePath Path relative to document root
+     */
+    async addNewFile(filePath) {
+        let count = await this.countDocumentFiles({
+            where: {
+                path: filePath
+            }
+        });
+
+        if(count === 0) {
+            logger.info("Found new file %s on document %d", filePath, this.id);
+
+            let documentFile = await DocumentFile.create({
+                path: filePath
+            });
+            await this.addDocumentFile(documentFile);
+        }
     }
 }
 
