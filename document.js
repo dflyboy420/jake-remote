@@ -29,7 +29,10 @@ class Document extends Sequelize.Model {
                             });
                             await this.addDocumentFile(documentFile);
                             if(documentFile.path === mainFileName) foundMainFile = true;
-                            cb();
+                            fs.unlink(file.path, err => {
+                                if (err) cb(err);
+                                else cb();
+                            });
                         }
                     });
                 }, (err) => {
