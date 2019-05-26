@@ -30,6 +30,15 @@ app.post("/upload", upload.array("documents"), async (req, res) => {
     res.json(document);
 });
 
+app.get("/document/:id", async (req, res) => {
+    if (!req.params.id) return res.status(400).send("no document specified");
+
+    let document = await Document.findByPk(req.params.id);
+    if(!document) res.sendStatus(400);
+
+    res.json(document);
+});
+
 app.get("/document/:id/compile", async (req, res) => {
     if (!req.params.id) return res.status(400).send("no document specified");
 
@@ -41,6 +50,29 @@ app.get("/document/:id/compile", async (req, res) => {
 
     res.json(document);
 });
+
+app.get("/document/:id/files/list", async (req, res) => {
+    if (!req.params.id) return res.status(400).send("no document specified");
+
+    let document = await Document.findByPk(req.params.id);
+    if(!document) res.sendStatus(400);
+
+    let files = await document.getDocumentFiles();
+
+    res.json(files);
+});
+
+app.get("/document/:id/download", async (req, res) => {
+    if (!req.params.id) return res.status(400).send("no document specified");
+
+    let document = await Document.findByPk(req.params.id);
+    if(!document) res.sendStatus(400);
+
+    let files = await document.getDocumentFiles();
+
+    res.json(files);
+});
+
 
 module.exports.start = () => {
     app.listen(HTTP_PORT, () => {
