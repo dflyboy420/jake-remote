@@ -45,6 +45,7 @@ DocumentFile.init({
     modelName: "documentFile"
 });
 
+// Document.hasOne(DocumentFile, { as: "mainFile" });
 Document.hasMany(DocumentFile);
 DocumentFile.belongsTo(Document);
 

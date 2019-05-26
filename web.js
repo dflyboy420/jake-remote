@@ -25,7 +25,7 @@ app.post("/upload", upload.array("documents"), async (req, res) => {
         mainFile: req.body.main
     });
 
-    await document.addFiles(req.files);
+    await document.addFiles(req.files, req.body.main);
 
     res.sendStatus(200);
 

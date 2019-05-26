@@ -15,6 +15,7 @@ class Document extends Sequelize.Model {
      */
     addFiles(files, mainFileName) {
         return new Promise((resolve, reject) => {
+            let foundMainFile = false;
             fs.mkdir(this.folder, (err) => {
                 if (err) throw err;
 
@@ -27,20 +28,20 @@ class Document extends Sequelize.Model {
                                 path: file.originalname
                             });
                             await this.addDocumentFile(documentFile);
-                            // if(documentFile.path === mainFileName) await this.setMainFile(documentFile);
+                            if(documentFile.path === mainFileName) foundMainFile = true;
                             cb();
                         }
                     });
                 }, (err) => {
                     if (err) {
-                        reject("Document files couldn't be copied");
+                        return reject("Document files couldn't be copied");
                     } else {
                         // this.getMainFile().then(mainFile => {
-                        // if(!mainFile) {
-                        //     return reject("Main file wasn't correctly specified");
-                        // }
+                        if(!foundMainFile) {
+                            return reject("Main file wasn't correctly specified");
+                        }
                         logger.info("Document folder for " + this.id + " was created");
-                        resolve();
+                        return resolve();
                         // });
                     }
                 });
