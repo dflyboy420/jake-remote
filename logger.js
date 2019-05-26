@@ -15,7 +15,7 @@ const {
     colorize
 } = format;
 
-const winstonTimestampColorize = require('winston-timestamp-colorize');
+const winstonTimestampColorize = require("winston-timestamp-colorize");
 
 const myFormat = printf(({
     level,
@@ -23,6 +23,12 @@ const myFormat = printf(({
     timestamp
 }) => {
     return `[${level} | ${timestamp}] ${message}`;
+});
+
+const sqlFormat = printf(({
+    message
+}) => {
+    return message;
 });
 
 const ENV = process.env.NODE_ENV;
@@ -92,6 +98,22 @@ const prettyLogger = createLogger({
     ),
     transports: [new transports.Console()]
 });
+
+const sqlLogger = createLogger({
+    format: combine(
+        simple(),
+        sqlFormat
+    ),
+    transports: [
+        new transports.File({
+            level: "verbose",
+            filename: "logs/sql.log",
+            format: filterOnly("verbose")
+        }),
+    ]
+});
+
+jsonLogger.add(sqlLogger);
 
 if (ENV !== "production")
     jsonLogger.add(prettyLogger);

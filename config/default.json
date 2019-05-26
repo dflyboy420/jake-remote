@@ -1,5 +1,18 @@
 {
     "http": {
         "port": 9549
+    },
+    "database": {
+        "username": "jake-remote",
+        "password": "zluDMI43zxIVVLgy",
+        "database": "jake-remote",
+        "host": "localhost",
+        "dialect": "mysql",
+        "define": {
+            "charset": "utf8mb4",
+            "dialectOptions": {
+                "collate": "utf8mb4_general_ci"
+            }
+        }
     }
 }

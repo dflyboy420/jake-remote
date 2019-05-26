@@ -1,22 +1,65 @@
 const config = require("config");
-const HTTP_PORT = config.get("http.port");
+const Sequelize = require("sequelize");
 
 const logger = require("./logger");
+const webserver = require("./web");
+const Document = require("./document");
+const DocumentFile = require("./documentFile");
 
-const express = require("express");
-const multer  = require('multer')
+const sequelize = new Sequelize(config.get("database"));
 
-const app = express();
-var upload = multer({ dest: 'uploads/' });
+const BASE_FOLER = __dirname + "/documents";
 
-app.get("/", (req, res) => {
-    // TODO: create default homepage
+Document.init({
+    name: {
+        type: Sequelize.STRING,
+        allowNull: true
+    },
+    compiled: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+    },
+    mainFile: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+    folder: {
+        type: Sequelize.VIRTUAL(Sequelize.STRING),
+        get() {
+            return BASE_FOLER + "/" + this.getDataValue("id");
+        },
+    },
+}, {
+    sequelize,
+    modelName: "document"
 });
 
-app.post("/compile", upload.array("document"), (req, res) => {
-    // TODO: make the main meat
+DocumentFile.init({
+    // relative to document root
+    path: {
+        type: Sequelize.STRING,
+        allowNull: false
+    },
+}, {
+    sequelize,
+    modelName: "documentFile"
 });
 
-app.listen(HTTP_PORT, () => {
-    logger.info("Listening on HTTP port %d", HTTP_PORT);
-})
+Document.hasMany(DocumentFile);
+DocumentFile.belongsTo(Document);
+
+function startDeamon() {
+    sequelize
+        .authenticate()
+        .then(() => {
+            logger.info("Connection has been established successfully.");
+            sequelize.sync().then(() => {
+                webserver.start();
+            });
+        })
+        .catch(err => {
+            logger.error("Unable to connect to the database:", err);
+        });
+}
+
+startDeamon();
