@@ -3,6 +3,8 @@ const HTTP_PORT = config.get("http.port");
 
 const logger = require("./logger");
 const Document = require("./document");
+const DocumentZip = require("./documentZip");
+
 const Compiler = require("./compiler");
 
 const express = require("express");
@@ -68,9 +70,14 @@ app.get("/document/:id/download", async (req, res) => {
     let document = await Document.findByPk(req.params.id);
     if(!document) res.sendStatus(400);
 
-    let files = await document.getDocumentFiles();
+    let zip = new DocumentZip(document);
+    await zip.addAllFiles();
+    let data = zip.generate();
 
-    res.json(files);
+    let fileName = (document.name !==null ? document.name : "jake-remote-"+document.id) + ".zip";
+    res.contentType("zip").set("Content-Disposition", `attachment; filename="${fileName}"`);
+
+    res.send(await data);
 });
 
 

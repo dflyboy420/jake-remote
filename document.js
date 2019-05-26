@@ -72,6 +72,11 @@ class Document extends Sequelize.Model {
             await this.addDocumentFile(documentFile);
         }
     }
+
+    async zipAllFiles() {
+
+    }
+
 }
 
 module.exports = Document;
