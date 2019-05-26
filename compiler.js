@@ -13,9 +13,9 @@ class Compiler {
      * @param {string[]} arguments Command line arguments
      * @param {*} id document id
      */
-    constructor(files, arguments, id) {
+    constructor(files, args, id) {
         this.rawFiles = files;
-        this.arguments = arguments;
+        this.arguments = args;
         this.folder = path.normalize(__dirname + "documents/" + id);
         this.files = [];
     }
@@ -34,7 +34,7 @@ class Compiler {
                         this.files.push(dest);
                         cb();
                     }
-                })
+                });
             }, (err) => {
                 if (err) {
                     throw new Error("Document files couldn't be copied");
@@ -42,7 +42,7 @@ class Compiler {
                     logger.info("Document folder for " + this.id + " was created");
                 }
             });
-        })
+        });
     }
 
     runJake() {
@@ -60,24 +60,8 @@ class Compiler {
                     logger.info("Executed lilly_jake successfully on document %d", this.id);
                     return resolve();
                 }
-            })
-        })
-    }
-
-    runMake() {
-        return new Promise((resolve, reject) => {
-            var makeInstance = spawn("make", {
-                cwd: this.folder
             });
-            makeInstance.on("close", (code) => {
-                if(code !== 0) {
-                    return reject("make failed with code %d", code);
-                } else {
-                    logger.info("Executed make successfully on document %d", this.id);
-                    return resolve();
-                }
-            })
-        })
+        });
     }
 
 }
