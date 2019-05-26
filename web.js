@@ -64,7 +64,7 @@ app.get("/document/:id/files/list", async (req, res) => {
     res.json(files);
 });
 
-app.get("/document/:id/download", async (req, res) => {
+app.get("/document/:id/files/download", async (req, res) => {
     if (!req.params.id) return res.status(400).send("no document specified");
 
     let document = await Document.findByPk(req.params.id);
