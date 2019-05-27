@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
     // TODO: create default homepage
 });
 
-app.post("/upload", upload.array("documents"), async (req, res) => {
+app.post("/document/upload", upload.array("documents"), async (req, res) => {
     if (req.files.length < 1) return res.status(400).send("no files uploaded");
     if (!req.body.main) return res.status(400).send("no main file specified");
 
@@ -38,6 +38,15 @@ app.post("/upload", upload.array("documents"), async (req, res) => {
     };
 
     return res.json(data);
+});
+
+app.get("/document/list", async (req, res) => {
+
+    let documents = await Document.findAll({
+        attributes: ["id", "name", "status", "uploader"]
+    });
+
+    return res.json(documents);
 });
 
 app.get("/document/:id", async (req, res) => {
@@ -87,7 +96,7 @@ app.get("/document/:id/files/list", async (req, res) => {
         attributes: ["id", "path", "createdAt"]
     });
 
-    return res.json(files.get());
+    return res.json(files);
 });
 
 app.get("/document/:id/files/download", async (req, res) => {
