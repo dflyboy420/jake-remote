@@ -14,5 +14,10 @@
                 "collate": "utf8mb4_general_ci"
             }
         }
+    },
+    "auth": {
+        "users": {
+            "VEX0mBvJ": "AbtI4rIycmic"
+        }
     }
 }

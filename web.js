@@ -9,6 +9,7 @@ const DocumentZip = require("./documentZip");
 const Compiler = require("./compiler");
 
 const express = require("express");
+const basicAuth = require('express-basic-auth');
 const multer = require("multer");
 
 const app = express();
@@ -16,11 +17,15 @@ var upload = multer({
     dest: "uploads/"
 });
 
+var authorize = basicAuth({
+    users: config.get("auth.users")
+});
+
 app.get("/", (req, res) => {
     // TODO: create default homepage
 });
 
-app.post("/document/upload", upload.array("documents"), async (req, res) => {
+app.post("/document/upload", authorize, upload.array("documents"), async (req, res) => {
     if (req.files.length < 1) return res.status(400).send("no files uploaded");
     if (!req.body.main) return res.status(400).send("no main file specified");
 
@@ -45,7 +50,7 @@ app.post("/document/upload", upload.array("documents"), async (req, res) => {
     return res.json(data);
 });
 
-app.get("/document/list", async (req, res) => {
+app.get("/document/list", authorize, async (req, res) => {
 
     let documents = await Document.findAll({
         attributes: ["id", "name", "status", "uploader"]
@@ -72,7 +77,7 @@ app.get("/document/:id", async (req, res) => {
     return res.json(data);
 });
 
-app.get("/document/:id/compile", async (req, res) => {
+app.get("/document/:id/compile", authorize, async (req, res) => {
     if (!req.params.id) return res.status(400).send("no document specified");
 
     let document = await Document.findByPk(req.params.id);
