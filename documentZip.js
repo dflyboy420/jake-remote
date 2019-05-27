@@ -1,6 +1,7 @@
 const JSZip = require("jszip");
 const fs = require("fs").promises;
 const path = require("path");
+const Op = require("sequelize").Op;
 
 class DocumentZip {
     /**
@@ -31,15 +32,32 @@ class DocumentZip {
             if (files.length === 1) file = files[0];
         }
 
-        if(!file) throw new Error("File not found");
+        if (!file) throw new Error("File not found");
         let filePath = path.resolve(this.document.folder, file.path);
         let data = await fs.readFile(filePath);
         this.zip.file(file.path, data);
     }
 
+    async addFiles(pattern) {
+        let files = await this.document.getDocumentFiles({
+            where: {
+                [Op.regexp]: pattern
+            }
+        });
+        if(files.length < 1) throw new Error("No files not found");
+
+        for (let file of files) {
+            let filePath = path.resolve(this.document.folder, file.path);
+            let data = await fs.readFile(filePath);
+            this.zip.file(file.path, data);
+        }
+    }
+
     async addAllFiles() {
         let files = await this.document.getDocumentFiles();
-        for(let file of files) {
+        if(files.length < 1) throw new Error("No files not found");
+
+        for (let file of files) {
             let filePath = path.resolve(this.document.folder, file.path);
             let data = await fs.readFile(filePath);
             this.zip.file(file.path, data);
@@ -47,7 +65,13 @@ class DocumentZip {
     }
 
     async generate() {
-        return this.zip.generateAsync({type: "nodebuffer"});
+        return this.zip.generateAsync({
+            type: "nodebuffer",
+            compression: "DEFLATE",
+            compressionOptions: {
+                level: 5
+            }
+        });
     }
 }
 

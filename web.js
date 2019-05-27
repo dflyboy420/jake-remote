@@ -29,14 +29,14 @@ app.post("/upload", upload.array("documents"), async (req, res) => {
 
     await document.addFiles(req.files, req.body.main);
 
-    res.json(document);
+    return res.json(document);
 });
 
 app.get("/document/:id", async (req, res) => {
     if (!req.params.id) return res.status(400).send("no document specified");
 
     let document = await Document.findByPk(req.params.id);
-    if(!document) res.sendStatus(400);
+    if(!document) return res.sendStatus(400);
 
     let fileCount = await document.countDocumentFiles();
     let data = {
@@ -46,14 +46,14 @@ app.get("/document/:id", async (req, res) => {
         fileCount
     };
 
-    res.json(data);
+    return res.json(data);
 });
 
 app.get("/document/:id/compile", async (req, res) => {
     if (!req.params.id) return res.status(400).send("no document specified");
 
     let document = await Document.findByPk(req.params.id);
-    if(!document) res.sendStatus(400);
+    if(!document) return res.sendStatus(400);
 
     let compiler = new Compiler(document);
     await compiler.compile();
@@ -66,27 +66,44 @@ app.get("/document/:id/compile", async (req, res) => {
         fileCount
     };
 
-    res.json(data);
+    return res.json(data);
 });
 
 app.get("/document/:id/files/list", async (req, res) => {
     if (!req.params.id) return res.status(400).send("no document specified");
 
     let document = await Document.findByPk(req.params.id);
-    if(!document) res.sendStatus(400);
+    if(!document) return res.sendStatus(400);
 
     let files = await document.getDocumentFiles({
         attributes: ["id", "path", "createdAt"]
     });
 
-    res.json(files);
+    return res.json(files.get());
 });
 
 app.get("/document/:id/files/download", async (req, res) => {
     if (!req.params.id) return res.status(400).send("no document specified");
+    if (!req.query.pattern) return res.status(400).send("no pattern specified");
 
     let document = await Document.findByPk(req.params.id);
-    if(!document) res.sendStatus(400);
+    if(!document) return res.sendStatus(400);
+
+    let zip = new DocumentZip(document);
+    await zip.addFiles(req.query.pattern);
+    let data = zip.generate();
+
+    let fileName = (document.name !==null ? document.name : "jake-remote-"+document.id) + ".zip";
+    res.contentType("zip").set("Content-Disposition", `attachment; filename="${fileName}"`);
+
+    return res.send(await data);
+});
+
+app.get("/document/:id/files/download/all", async (req, res) => {
+    if (!req.params.id) return res.status(400).send("no document specified");
+
+    let document = await Document.findByPk(req.params.id);
+    if(!document) return res.sendStatus(400);
 
     let zip = new DocumentZip(document);
     await zip.addAllFiles();
@@ -95,7 +112,7 @@ app.get("/document/:id/files/download", async (req, res) => {
     let fileName = (document.name !==null ? document.name : "jake-remote-"+document.id) + ".zip";
     res.contentType("zip").set("Content-Disposition", `attachment; filename="${fileName}"`);
 
-    res.send(await data);
+    return res.send(await data);
 });
 
 
