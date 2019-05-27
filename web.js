@@ -3,6 +3,7 @@ const HTTP_PORT = config.get("http.port");
 
 const logger = require("./logger");
 const Document = require("./document");
+const DocumentFile = require("./documentFile");
 const DocumentZip = require("./documentZip");
 
 const Compiler = require("./compiler");
@@ -23,10 +24,13 @@ app.post("/document/upload", upload.array("documents"), async (req, res) => {
     if (req.files.length < 1) return res.status(400).send("no files uploaded");
     if (!req.body.main) return res.status(400).send("no main file specified");
 
-    let document = await Document.create({
+    let document = Document.build({
         mainFile: req.body.main,
         uploader: req.ip
     });
+
+    if(req.body.name) document.name = req.body.name;
+    await document.save();
 
     await document.addFiles(req.files, req.body.main);
 
@@ -132,6 +136,16 @@ app.get("/document/:id/files/download/all", async (req, res) => {
     res.contentType("zip").set("Content-Disposition", `attachment; filename="${fileName}"`);
 
     return res.send(await data);
+});
+
+app.get("/file/:id/download", async (req, res) => {
+    if (!req.params.id) return res.status(400).send("no file specified");
+
+    let file = await DocumentFile.findByPk(req.params.id);
+    if(!file) return res.status(400).send("file id invalid");
+    let path = await file.getFullPath();
+
+    return res.sendFile(path);
 });
 
 
