@@ -24,7 +24,8 @@ app.post("/document/upload", upload.array("documents"), async (req, res) => {
     if (!req.body.main) return res.status(400).send("no main file specified");
 
     let document = await Document.create({
-        mainFile: req.body.main
+        mainFile: req.body.main,
+        uploader: req.ip
     });
 
     await document.addFiles(req.files, req.body.main);
@@ -60,6 +61,7 @@ app.get("/document/:id", async (req, res) => {
         id: document.id,
         name: document.name,
         status: document.status,
+        uploader: document.uploader,
         fileCount
     };
 

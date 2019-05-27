@@ -37,6 +37,10 @@ Document.init({
         type: Sequelize.STRING,
         allowNull: false
     },
+    uploader: {
+        type: Sequelize.STRING(40),
+        allowNull: false
+    },
     folder: {
         type: Sequelize.VIRTUAL(Sequelize.STRING),
         get() {
@@ -63,18 +67,17 @@ DocumentFile.init({
 Document.hasMany(DocumentFile);
 DocumentFile.belongsTo(Document);
 
-function startDeamon() {
-    sequelize
-        .authenticate()
-        .then(() => {
-            logger.info("Connection has been established successfully.");
-            sequelize.sync().then(() => {
-                webserver.start();
-            });
-        })
-        .catch(err => {
-            logger.error("Unable to connect to the database:", err);
+async function startDeamon() {
+    try {
+        await sequelize.authenticate();
+        logger.info("Connection has been established successfully.");
+        await sequelize.sync({
+            force: (process.argv[2] === "reset")
         });
+        webserver.start();
+    } catch (err) {
+        logger.error("Unable to connect to the database:", err);
+    }
 }
 
 startDeamon();
