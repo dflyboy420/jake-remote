@@ -1,5 +1,9 @@
-const fs = require("fs");
-const { normalize, resolve, relative } = require("path");
+const fs = require("fs").promises;
+const {
+    normalize,
+    resolve,
+    relative
+} = require("path");
 const {
     spawn
 } = require("child_process");
@@ -19,28 +23,26 @@ class Compiler {
     }
 
     async compile() {
+        await this.document.update({
+            status: "compiling"
+        });
         await this.runJake();
         await this.checkNewFiles("");
     }
 
-    checkNewFiles(basePath) {
-        return new Promise((res, reject) => {
-            let path = resolve(this.folder, basePath);
-            fs.readdir(path, {
-                withFileTypes: true
-            }, async (err, files) => {
-                if(err) return reject(err);
-                for (let file of files) {
-                    let filePath = relative(this.folder, path + "/" + file.name);
-                    if(file.isFile()) {
-                        await this.document.addNewFile(filePath);
-                    } else if(file.isDirectory()) {
-                        await this.checkNewFiles(filePath);
-                    }
-                }
-                res();
-            });
+    async checkNewFiles(basePath) {
+        let path = resolve(this.folder, basePath);
+        let files = await fs.readdir(path, {
+            withFileTypes: true
         });
+        for (let file of files) {
+            let filePath = relative(this.folder, path + "/" + file.name);
+            if (file.isFile()) {
+                await this.document.addNewFile(filePath);
+            } else if (file.isDirectory()) {
+                await this.checkNewFiles(filePath);
+            }
+        }
     }
 
     runJake() {
@@ -50,16 +52,18 @@ class Compiler {
             var jakeInstance = spawn("lilly_jake", args, {
                 cwd: this.folder
             });
-            jakeInstance.on("close", (code) => {
+            jakeInstance.on("close", async (code) => {
                 if (code !== 0) {
+                    await this.document.update({
+                        status: "failed"
+                    });
                     return reject("lilly_jake failed with code %d", code);
                 } else {
                     logger.info("Executed lilly_jake successfully on document %d", this.document.id);
-                    this.document.update({
-                        compiled: true
-                    }).then(() => {
-                        return resolve();
+                    await this.document.update({
+                        status: "done"
                     });
+                    return resolve();
                 }
             });
         });

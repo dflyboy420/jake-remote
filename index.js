@@ -29,9 +29,9 @@ Document.init({
         type: Sequelize.STRING,
         allowNull: true
     },
-    compiled: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false
+    status: {
+        type: Sequelize.ENUM("pending", "compiling", "done", "failed"),
+        defaultValue: "pending"
     },
     mainFile: {
         type: Sequelize.STRING,
