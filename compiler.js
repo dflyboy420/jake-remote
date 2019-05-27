@@ -26,7 +26,11 @@ class Compiler {
         await this.document.update({
             status: "compiling"
         });
-        await this.runJake();
+        try {
+            await this.runJake();
+        } catch (e) {
+            logger.error(e);
+        }
         await this.checkNewFiles("");
     }
 
@@ -57,7 +61,7 @@ class Compiler {
                     await this.document.update({
                         status: "failed"
                     });
-                    return reject("lilly_jake failed with code %d", code);
+                    return reject("lilly_jake failed with code " + code);
                 } else {
                     logger.info("Executed lilly_jake successfully on document %d", this.document.id);
                     await this.document.update({
