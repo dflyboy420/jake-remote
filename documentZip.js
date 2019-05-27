@@ -41,10 +41,12 @@ class DocumentZip {
     async addFiles(pattern) {
         let files = await this.document.getDocumentFiles({
             where: {
-                [Op.regexp]: pattern
+                path: {
+                    [Op.regexp]: pattern
+                }
             }
         });
-        if(files.length < 1) throw new Error("No files not found");
+        if (files.length < 1) throw new Error("No files not found");
 
         for (let file of files) {
             let filePath = path.resolve(this.document.folder, file.path);
@@ -55,7 +57,7 @@ class DocumentZip {
 
     async addAllFiles() {
         let files = await this.document.getDocumentFiles();
-        if(files.length < 1) throw new Error("No files not found");
+        if (files.length < 1) throw new Error("No files not found");
 
         for (let file of files) {
             let filePath = path.resolve(this.document.folder, file.path);
