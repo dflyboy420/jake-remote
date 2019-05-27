@@ -38,7 +38,15 @@ app.get("/document/:id", async (req, res) => {
     let document = await Document.findByPk(req.params.id);
     if(!document) res.sendStatus(400);
 
-    res.json(document);
+    let fileCount = await document.countDocumentFiles();
+    let data = {
+        id: document.id,
+        name: document.name,
+        compiled: document.compiled,
+        fileCount
+    };
+
+    res.json(data);
 });
 
 app.get("/document/:id/compile", async (req, res) => {
@@ -50,7 +58,15 @@ app.get("/document/:id/compile", async (req, res) => {
     let compiler = new Compiler(document);
     await compiler.compile();
 
-    res.json(document);
+    let fileCount = await document.countDocumentFiles();
+    let data = {
+        id: document.id,
+        name: document.name,
+        compiled: document.compiled,
+        fileCount
+    };
+
+    res.json(data);
 });
 
 app.get("/document/:id/files/list", async (req, res) => {
@@ -59,7 +75,9 @@ app.get("/document/:id/files/list", async (req, res) => {
     let document = await Document.findByPk(req.params.id);
     if(!document) res.sendStatus(400);
 
-    let files = await document.getDocumentFiles();
+    let files = await document.getDocumentFiles({
+        attributes: ["id", "path", "createdAt"]
+    });
 
     res.json(files);
 });
