@@ -6,7 +6,21 @@ const webserver = require("./web");
 const Document = require("./document");
 const DocumentFile = require("./documentFile");
 
-const sequelize = new Sequelize(config.get("database"));
+function sqlLog(str) {
+    logger.verbose(str);
+}
+
+const seqConfig = config.get("database");
+
+var sequelize = new Sequelize({
+    host: seqConfig.host,
+    database: seqConfig.database,
+    username: seqConfig.username,
+    password: seqConfig.password,
+    dialect: seqConfig.dialect,
+    define: seqConfig.define,
+    logging: sqlLog
+});
 
 const BASE_FOLER = __dirname + "/documents";
 
