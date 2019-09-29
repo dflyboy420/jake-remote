@@ -42,7 +42,7 @@ class DocumentZip {
         let files = await this.document.getDocumentFiles({
             where: {
                 path: {
-                    [Op.regexp]: pattern
+                    [Op.like]: pattern
                 }
             }
         });

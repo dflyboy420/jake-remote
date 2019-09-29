@@ -9,7 +9,7 @@ const DocumentZip = require("./documentZip");
 const Compiler = require("./compiler");
 
 const express = require("express");
-const basicAuth = require('express-basic-auth');
+const basicAuth = require("express-basic-auth");
 const multer = require("multer");
 
 const app = express();
@@ -84,7 +84,7 @@ app.get("/document/:id/compile", authorize, async (req, res) => {
     if (!document) return res.sendStatus(400);
 
     let compiler = new Compiler(document);
-    compiler.compile();
+    await compiler.compile();
 
     let fileCount = await document.countDocumentFiles();
     let data = {
@@ -119,6 +119,22 @@ app.get("/document/:id/files/download", async (req, res) => {
 
     let zip = new DocumentZip(document);
     await zip.addFiles(req.query.pattern);
+    let data = zip.generate();
+
+    let fileName = (document.name !== null ? document.name : "jake-remote-" + document.id) + ".zip";
+    res.contentType("zip").set("Content-Disposition", `attachment; filename="${fileName}"`);
+
+    return res.send(await data);
+});
+
+app.get("/document/:id/files/download/pdf", async (req, res) => {
+    if (!req.params.id) return res.status(400).send("no document specified");
+
+    let document = await Document.findByPk(req.params.id);
+    if (!document) return res.sendStatus(400);
+
+    let zip = new DocumentZip(document);
+    await zip.addFiles("%.pdf");
     let data = zip.generate();
 
     let fileName = (document.name !== null ? document.name : "jake-remote-" + document.id) + ".zip";

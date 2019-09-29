@@ -13,10 +13,7 @@ function sqlLog(str) {
 const seqConfig = config.get("database");
 
 var sequelize = new Sequelize({
-    host: seqConfig.host,
-    database: seqConfig.database,
-    username: seqConfig.username,
-    password: seqConfig.password,
+    storage: seqConfig.storage,
     dialect: seqConfig.dialect,
     define: seqConfig.define,
     logging: sqlLog

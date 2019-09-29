@@ -53,7 +53,7 @@ class Compiler {
         return new Promise((resolve, reject) => {
             let mainFile = this.document.mainFile;
             let args = [mainFile];
-            var jakeInstance = spawn("lilly_jake", args, {
+            var jakeInstance = spawn("jake", args, {
                 cwd: this.folder
             });
             jakeInstance.on("close", async (code) => {
@@ -61,9 +61,9 @@ class Compiler {
                     await this.document.update({
                         status: "failed"
                     });
-                    return reject("lilly_jake failed with code " + code);
+                    return reject("jake failed with code " + code);
                 } else {
-                    logger.info("Executed lilly_jake successfully on document %d", this.document.id);
+                    logger.info("Executed jake successfully on document %d", this.document.id);
                     await this.document.update({
                         status: "done"
                     });

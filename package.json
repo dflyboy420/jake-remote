@@ -18,15 +18,15 @@
   },
   "homepage": "https://github.com/dflyboy420/jake-remote#readme",
   "dependencies": {
-    "async": "^2.6.2",
-    "config": "^3.1.0",
+    "async": "^3.1.0",
+    "config": "^3.2.2",
     "express": "^4.17.1",
     "express-basic-auth": "^1.2.0",
-    "jszip": "^3.2.1",
-    "multer": "^1.4.1",
-    "mysql2": "^1.6.5",
-    "sequelize": "^5.8.6",
+    "jszip": "^3.2.2",
+    "multer": "^1.4.2",
+    "sequelize": "^5.19.1",
+    "sqlite3": "^4.1.0",
     "winston": "^3.2.1",
-    "winston-timestamp-colorize": "^1.0.2"
+    "winston-timestamp-colorize": "^1.0.4"
   }
 }
