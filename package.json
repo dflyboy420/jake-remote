@@ -19,7 +19,7 @@
   "homepage": "https://github.com/dflyboy420/jake-remote#readme",
   "dependencies": {
     "async": "^3.1.0",
-    "config": "^3.2.2",
+    "config": "^3.3.8",
     "express": "^4.17.1",
     "express-basic-auth": "^1.2.0",
     "jszip": "^3.2.2",
